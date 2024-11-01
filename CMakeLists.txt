@@ -36,7 +36,15 @@ find_package(cryptopp CONFIG)
 if (CryptoPP_FOUND)  # vcpkg-provided cmake package called CryptoPP
     set(Crypto++_LIBRARIES "cryptopp::cryptopp")
 else()
-    find_package(Crypto++ REQUIRED)
+    # Tenta localizar a instalação manual do Crypto++
+    set(Crypto++_INCLUDE_DIR "/usr/local/include")
+    set(Crypto++_LIBRARIES "/usr/local/lib/libcryptopp.so")
+    if (EXISTS ${Crypto++_INCLUDE_DIR} AND EXISTS ${Crypto++_LIBRARIES})
+        message(STATUS "Crypto++ library found manually.")
+        include_directories(${Crypto++_INCLUDE_DIR})
+    else()
+        message(FATAL_ERROR "Could NOT find Crypto++ library. Please install or set path manually.")
+    endif()
 endif ()
 
 find_package(fmt CONFIG)
@@ -77,7 +85,6 @@ find_package(Boost 1.66.0 REQUIRED COMPONENTS system iostreams)
 
 include_directories(${Boost_INCLUDE_DIRS} ${Crypto++_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${PUGIXML_INCLUDE_DIR})
 target_link_libraries(tfs PRIVATE
-        Boost::system
         Boost::system
         Boost::iostreams
         fmt::fmt
